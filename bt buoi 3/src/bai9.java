@@ -11,8 +11,7 @@ public class bai9 {
             System.out.print("Nhập địa chỉ sinh viên: ");
             address = scanner.nextLine();
             System.out.print("Nhập tuổi của sinh viên: ");
-            age = scanner.nextInt();
-            scanner.nextLine();
+            age = Integer.parseInt(scanner.nextLine());
             System.out.println("\nThông tin sinh viên:");
             System.out.println("Tên: " + name);
             System.out.println("Địa chỉ: " + address);
