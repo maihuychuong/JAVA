@@ -50,41 +50,37 @@ public class Main {
         int r2 = Integer.parseInt(scanner.nextLine());
         int c2 = Integer.parseInt(scanner.nextLine());
         int[][] B = new int[r2][c2];
-        if (r1 != r2 && c1 != c2) {
+        if (r1 != r2 || c1 != c2) {
             System.out.println("K the thuc hien.");
-        }
-        System.out.println("Nhap gia tri ma tran A:");
-        for (int i = 0; i < r1; i++) {
-            for (int j = 0; j < c1; j++) {
-                System.out.print("Nhap phan tu A[" + i + "][" + j + "]:" + "\t");
-                A[i][j] = scanner.nextInt();
+        } else {
+            System.out.println("Nhap gia tri phan tu ma tran A:");
+            for (int i = 0; i < r1; i++) {
+                for (int j = 0; j < c1; j++) {
+                    System.out.print("Nhap phan tu A[" + i + "][" + j + "]:" + "\t");
+                    A[i][j] = scanner.nextInt();
+                }
+            }
+            System.out.println("Nhap gia tri phan tu ma tran B:");
+            for (int m = 0; m < r2; m++) {
+                for (int n = 0; n < c1; n++) {
+                    System.out.print("Nhap phan tu B[" + m + "][" + n + "]:" + "\t");
+                    B[m][n] = scanner.nextInt();
+                }
+            }
+            System.out.println("Các phan tu ma tran A:");
+            for (int i = 0; i < r1; i++) {
+                for (int j = 0; j < c1; j++) {
+                    System.out.print(A[i][j] + "\t");
+                }
+                System.out.println();
+            }
+            System.out.println("\nCác phan tu ma tran B:");
+            for (int m = 0; m < r2; m++) {
+                for (int n = 0; n < c1; n++) {
+                    System.out.print(B[m][n] + "\t");
+                }
+                System.out.println();
             }
         }
-        System.out.println("Nhap gia tri ma tran B:");
-        for (int m = 0; m < r2; m++) {
-            for (int n = 0; n < c1; n++) {
-                System.out.print("Nhap phan tu B[" + m + "][" + n + "]:" + "\t");
-                B[m][n] = scanner.nextInt();
-            }
-        }
-        System.out.println("Các gia tri ma tran A:");
-        for (int i = 0; i < r1; i++) {
-            for (int j = 0; j < c1; j++) {
-                System.out.print(A[i][j]+"\t");
-            }
-            System.out.println();
-        }
-        System.out.println("\nCác gia tri ma tran B:");
-        for (int m = 0; m < r2; m++) {
-            for (int n = 0; n < c1; n++) {
-                System.out.print(B[m][n]+"\t");
-            }
-            System.out.println();
-        }
-//        int[][] resultMatix = new int[c1][r1];
-//        for (int i = 0; i < r1; i++) {
-//            for (int j = 0; j < r1; j++) {
-//                resultMatix[i][j] = A[i][j] + B[m][n];
-//            }
     }
 }
