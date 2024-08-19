@@ -2,12 +2,14 @@ import java.util.Scanner;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
         Account account = new Account("techmaster", "hoclacoviec", 1000000);
         if (login(account)) {
             menu(account);
         }
     }
+
     public static boolean login(Account account) {
         boolean loginSuccess = false;
         while (!loginSuccess) {
@@ -29,6 +31,7 @@ public class Main {
         }
         return loginSuccess;
     }
+
     public static void menu(Account account) {
         boolean continueUsing = true;
 
@@ -40,7 +43,7 @@ public class Main {
 
             System.out.print("Lựa chọn của bạn: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline left-over
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
@@ -66,10 +69,11 @@ public class Main {
             }
         }
     }
+
     public static void withdrawMoney(Account account) {
         System.out.print("Nhập số tiền muốn rút: ");
         long amount = scanner.nextLong();
-        scanner.nextLine(); // Consume newline left-over
+        scanner.nextLine();
         account.withdraw(amount);
     }
 }
