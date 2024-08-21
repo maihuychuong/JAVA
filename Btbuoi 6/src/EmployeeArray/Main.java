@@ -1,4 +1,4 @@
-package BT3;
+package EmployeeArray;
 
 import java.util.Scanner;
 

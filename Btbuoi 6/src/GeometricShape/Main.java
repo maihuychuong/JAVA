@@ -1,4 +1,4 @@
-package BT4;
+package GeometricShape;
 
 import java.util.Scanner;
 

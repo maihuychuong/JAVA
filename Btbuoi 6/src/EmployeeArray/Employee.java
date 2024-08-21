@@ -1,4 +1,4 @@
-package BT3;
+package EmployeeArray;
 
 public class Employee extends Person {
     private double experience;

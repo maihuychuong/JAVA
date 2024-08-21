@@ -1,4 +1,4 @@
-package BT4;
+package GeometricShape;
 
 public class HinhVuong extends HinhHoc {
     private double canh;

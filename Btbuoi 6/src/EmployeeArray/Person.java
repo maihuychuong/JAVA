@@ -1,4 +1,4 @@
-package BT3;
+package EmployeeArray;
 
 public class Person {
     private int id;

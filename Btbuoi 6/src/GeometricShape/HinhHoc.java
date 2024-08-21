@@ -1,4 +1,4 @@
-package BT4;
+package GeometricShape;
 
 public class HinhHoc {
     private double chuVi;
