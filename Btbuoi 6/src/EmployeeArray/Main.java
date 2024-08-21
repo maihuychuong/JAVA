@@ -25,9 +25,8 @@ public class Main {
             employees[i] = new Employee(id, name, address, age, experience, placeWork);
         }
         System.out.println("\nThông tin nhân viên:");
-        for (Employee employee : employees) {
-            System.out.println("----------------------");
-            System.out.println(employee);
+        for (int i = 0; i < n; i++) {
+            System.out.println("Nhân viên thứ "+(i + 1)+":"+employees[i]);
         }
     }
 }
