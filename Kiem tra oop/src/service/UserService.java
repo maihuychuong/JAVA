@@ -16,7 +16,7 @@ public class UserService {
             System.out.println("Nhập username: ");
             username = scanner.nextLine();
             if (existUsername(username)) {
-                System.out.println("Username đã tồn tại. Vui lòng thử lại với một username khác.");
+                System.out.println("Username đã tồn tại. Vui lòng thử lại.");
             }
         } while (existUsername(username));
 
