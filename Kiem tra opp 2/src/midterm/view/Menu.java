@@ -75,13 +75,13 @@ public class Menu {
                 System.exit(0);
         }
     }
-    public void displayForgotPassword(Scanner scanner){
+    private void displayForgotPassword(Scanner scanner){
         System.out.println("1 - Đăng nhập lại.");
         System.out.println("2 - Quên mật khẩu");
         System.out.println("Mời lựa chọn: ");
-        sselectForgotPassword(scanner);
+        selectForgotPassword(scanner);
     }
-    private void sselectForgotPassword(Scanner scanner){
+    private void selectForgotPassword(Scanner scanner){
         int choice = Integer.parseInt(scanner.nextLine());
         switch (choice){
             case 1:
