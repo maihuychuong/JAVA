@@ -22,7 +22,7 @@ public class Menu {
                 System.out.println("Thực hiện login");
                 User user = userService.login(scanner);
                 if(user != null){
-                    System.out.println("Chào mừng "+user.getUsername()+" , bạn có thể thực hiện các công việc sau:”\\n");
+                    System.out.println("Chào mừng "+user.getUsername()+" , bạn có thể thực hiện các công việc sau: ");
                     displayPostLogin(scanner, user);
                 } else {
                     System.out.println("Username hoặc password không đúng");

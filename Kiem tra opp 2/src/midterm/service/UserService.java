@@ -72,7 +72,7 @@ public class UserService {
         }
         return null;
     }
-    private User findUserByUsernameAndPassword(String username, String password){// 100
+    private User findUserByUsernameAndPassword(String username, String password){
         for (User user: Database.users){
             if(user.getUsername().equals(username) && user.getPassword().equals(password)){
                 return user;
