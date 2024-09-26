@@ -6,15 +6,15 @@ public class Product {
     private String name;
     private double price;
     private String description;
-    private int amount;
+    private int quantity;
     private String seller;
 
-    public Product(String name, double price, String description, int amount, String seller) {
+    public Product(String name, double price, String description, int quantity, String seller) {
         this.id = ++autoId;
         this.name = name;
         this.price = price;
         this.description = description;
-        this.amount = amount;
+        this.quantity = quantity;
         this.seller = seller;
     }
 
@@ -50,12 +50,12 @@ public class Product {
         this.description = description;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getSeller() {
@@ -73,7 +73,7 @@ public class Product {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", description='" + description + '\'' +
-                ", amount=" + amount +
+                ", quantity=" + quantity +
                 ", seller='" + seller + '\'' +
                 '}';
     }
