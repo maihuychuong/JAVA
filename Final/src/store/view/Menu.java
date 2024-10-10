@@ -2,6 +2,8 @@ package store.view;
 
 import store.data.Database;
 import store.entities.User;
+import store.service.CartService;
+import store.service.OrderService;
 import store.service.ProductService;
 import store.service.UserService;
 import store.utils.Utils;
@@ -11,7 +13,8 @@ import java.util.Scanner;
 public class Menu {
     UserService userService = new UserService();
     ProductService productService = new ProductService();
-
+    CartService cartService = new CartService();
+    OrderService orderService =new OrderService();
     public void preLogin(Scanner scanner) {
         System.out.println("1 - Đăng nhập");
         System.out.println("2 - Đăng ký");
@@ -62,7 +65,7 @@ public class Menu {
                 } else if ("Customer".equalsIgnoreCase(user.getRole())) {
                     customerMenu(scanner, user);
                 } else if ("Admin".equalsIgnoreCase(user.getRole())) {
-                    sellerMenu(scanner, user);
+                    adminMenu(scanner, user);
                 }
                 break;
             case 2:
@@ -148,8 +151,11 @@ public class Menu {
                 productSellerMenu(scanner, user);
                 break;
             case 2:
+                orderMenu(scanner, user);
                 break;
             case 3:
+                System.out.println("Thực hiện hiển thị doanh thu của người bán: ");
+                orderService.displayRevenue(user);
                 break;
             case 4:
                 postLogin(scanner, user);
@@ -177,17 +183,17 @@ public class Menu {
                 break;
             case 2:
                 System.out.println("Thực hiện thêm sản phẩm");
-                productService.addProduct(scanner);
+                productService.addProduct(scanner, user);
                 System.out.println("Thêm sản phẩm thành công");
                 break;
             case 3:
                 System.out.println("Thực hiện cập nhật sản phẩm");
-                productService.editProduct(scanner, true);
+                productService.editProduct(scanner, true, user);
                 System.out.println("Cập nhật sản phẩm thành công");
                 break;
             case 4:
                 System.out.println("Thực hiện xóa sản phẩm");
-                productService.editProduct(scanner, false);
+                productService.editProduct(scanner, false, user);
                 System.out.println("Xóa sản phẩm thành công");
                 break;
             case 5:
@@ -195,11 +201,35 @@ public class Menu {
         }
     }
 
+    private void orderMenu(Scanner scanner, User user){
+        while (true) {
+            System.out.println("1 - Hiển thị danh sách đơn hàng");
+            System.out.println("2 - Xử lý đơn hàng");
+            System.out.println("3 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectOrderMenu(scanner, user);
+        }
+    }
+
+    private void selectOrderMenu(Scanner scanner, User user){
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiện hiển thị danh sách đơn hàng");
+                orderService.displayOrder(user);
+                break;
+            case 2:
+                System.out.println("Thực hiện xử lý đơn hàng");
+                break;
+            case 3:
+                sellerMenu(scanner, user);
+        }
+    }
+
     private void customerMenu(Scanner scanner, User user) {
         while (true) {
-            System.out.println("1 - Danh sách sản phẩm");
+            System.out.println("1 - Duyệt sản phẩm");
             System.out.println("2 - Quản lý giỏ hàng");
-            System.out.println("3 - Thanh toán");
             System.out.println("4 - Xem lịch sử mua hàng");
             System.out.println("5 - Quay lại");
             System.out.println("Mời lựa chọn: ");
@@ -217,10 +247,9 @@ public class Menu {
                 cartMenu(scanner, user);
                 break;
             case 3:
+                orderService.displayPurchaseHistory(user);
                 break;
             case 4:
-                break;
-            case 5:
                 postLogin(scanner, user);
         }
     }
@@ -245,16 +274,16 @@ public class Menu {
                 System.out.println(Database.products);
                 break;
             case 2:
-                System.out.println("Thực hiện tìm kiếm sản phầm theo tên");
+                System.out.println("Thực hiện lọc sản phầm theo tên");
                 productService.filterByName(scanner);
                 break;
             case 3:
-                System.out.println("Thực hiện tìm kiếm sản phầm theo khoảng giá");
+                System.out.println("Thực hiện lọc sản phầm theo khoảng giá");
                 filterByPrice(scanner, user);
                 break;
             case 4:
-                System.out.println("Thực hiện tìm kiếm sản phầm theo tên người bán");
-                productService.findProductBySeller(scanner);
+                System.out.println("Thực hiện lọc sản phầm theo tên người bán");
+                productService.filterBySeller(scanner);
                 break;
             case 5:
                 postLogin(scanner, user);
@@ -277,16 +306,16 @@ public class Menu {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
-                System.out.println("Danh sách sản phẩm dưới 100.000Đ: ");
-                productService.findProductByPriceLow();
+                System.out.println("Danh sách sản phẩm có giá dưới 100.000Đ: ");
+                productService.filterByPriceLow();
                 break;
             case 2:
-                System.out.println("Danh sách sản phẩm từ 100.000 đến 500.000Đ: ");
-                productService.findProductByPriceMed();
+                System.out.println("Danh sách sản phẩm có giá từ 100.000 đến 500.000Đ: ");
+                productService.filterByPriceMed();
                 break;
             case 3:
-                System.out.println("Danh sách sản phẩm trên 500.000Đ: ");
-                productService.findProductByPriceHigh();
+                System.out.println("Danh sách sản phẩm có giá trên 500.000Đ: ");
+                productService.filterByPriceHigh();
                 break;
             case 4:
                 productCustomerMenu(scanner, user);
@@ -296,9 +325,9 @@ public class Menu {
         while (true){
             System.out.println("1 - Thêm sản phẩm");
             System.out.println("2 - Xóa sản phẩm");
-            System.out.println("3 - Danh sách sản phẩm đã thêm vào giỏ hàng");
+            System.out.println("3 - Danh sách sản phẩm trong giỏ hàng");
             System.out.println("4 - Xác nhận đơn hàng");
-            System.out.println("5 - Hủy đơn hàng");
+            System.out.println("5 - Hủy giỏ hàng");
             System.out.println("6 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectCartMenu(scanner, user);
@@ -306,6 +335,47 @@ public class Menu {
 
     }
     private void selectCartMenu(Scanner scanner, User user){
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiện thêm sản phẩm vào đơn hàng");
+                cartService.addProductToCart(scanner);
+                break;
+            case 2:
+                System.out.println("Thực hiện xóa sản phẩm khỏi đơn hàng");
+                cartService.removeProductFromCart(scanner);
+                break;
+            case 3:
+                System.out.println("Thực hiện hiển thị các sản phẩm trong giỏ hàng");
+                cartService.displayCart();
+                break;
+            case 4:
+                System.out.println("Thực hiện xác nhận đơn hàng");
+                orderService.confirmOrder(scanner, user);
+                break;
+            case 5:
+                System.out.println("Thực hiện hủy giỏ hàng");
+                cartService.deleteCart();
+                System.out.println("Hủy giỏ hàng thành công");
+                break;
+            case 6:
+                customerMenu(scanner, user);
+        }
+    }
+
+    private void adminMenu(Scanner scanner, User user){
+        while (true){
+            System.out.println("1 - Quản lí người dùng");
+            System.out.println("2 - Quản lí sản phẩm");
+            System.out.println("3 - Quản lí đơn hàng");
+            System.out.println("4 - Thống kê doanh thu");
+            System.out.println("5 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectAdminMenu(scanner, user);
+        }
+    }
+
+    private void selectAdminMenu(Scanner scanner, User user){
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
@@ -317,9 +387,7 @@ public class Menu {
             case 4:
                 break;
             case 5:
-                break;
-            case 6:
-                customerMenu(scanner, user);
+                postLogin(scanner, user);
         }
     }
 }

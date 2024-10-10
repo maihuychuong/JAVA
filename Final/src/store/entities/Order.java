@@ -1,28 +1,25 @@
 package store.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public class Order {
     private static int autoId;
     private int id;
-    private Product product;
-    private User buyer;
-    private User seller;
-    private int quantity;
-    private double totalPrice;
+    private Map<Integer, Integer> productsCart;
+    private String buyer;
+    private BigDecimal totalPrice;
     private String orderStatus;
     private LocalDateTime orderDate;
     private String shippingAddress;
 
-    public Order(Product product, User buyer, User seller, int quantity, double totalPrice, LocalDateTime orderDate, String shippingAddress) {
+    public Order(Map<Integer, Integer> productsCart, String buyer, BigDecimal totalPrice, LocalDateTime orderDate, String shippingAddress) {
         this.id = ++autoId;
-        this.product = product;
+        this.productsCart = productsCart;
         this.buyer = buyer;
-        this.seller = seller;
-        this.quantity = quantity;
         this.totalPrice = totalPrice;
-        this.orderStatus = "Chờ xác nhận";
+        this.orderStatus = "Chờ xử lý, Chưa thanh toán";
         this.orderDate = orderDate;
         this.shippingAddress = shippingAddress;
     }
@@ -35,43 +32,27 @@ public class Order {
         this.id = id;
     }
 
-    public Product getProduct() {
-        return product;
+    public Map<Integer, Integer> getProductsCart() {
+        return productsCart;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setProductsCart(Map<Integer, Integer> productsCart) {
+        this.productsCart = productsCart;
     }
 
-    public User getBuyer() {
+    public String getBuyer() {
         return buyer;
     }
 
-    public void setBuyer(User buyer) {
+    public void setBuyer(String buyer) {
         this.buyer = buyer;
     }
 
-    public User getSeller() {
-        return seller;
-    }
-
-    public void setSeller(User seller) {
-        this.seller = seller;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(double totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 
@@ -103,10 +84,8 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", product=" + product +
-                ", buyer=" + buyer +
-                ", seller=" + seller +
-                ", quantity=" + quantity +
+                ", productsCart=" + productsCart +
+                ", buyer='" + buyer + '\'' +
                 ", totalPrice=" + totalPrice +
                 ", orderStatus='" + orderStatus + '\'' +
                 ", orderDate=" + orderDate +

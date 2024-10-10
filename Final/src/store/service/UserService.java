@@ -6,7 +6,6 @@ import store.entities.User;
 import store.utils.Utils;
 
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class UserService {
 

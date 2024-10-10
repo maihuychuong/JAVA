@@ -1,15 +1,17 @@
 package store.entities;
 
+import java.math.BigDecimal;
+
 public class Product {
     private static int autoId;
     private int id;
     private String name;
-    private double price;
+    private BigDecimal price;
     private String description;
     private int quantity;
     private String seller;
 
-    public Product(String name, double price, String description, int quantity, String seller) {
+    public Product(String name, BigDecimal price, String description, int quantity, String seller) {
         this.id = ++autoId;
         this.name = name;
         this.price = price;
@@ -34,11 +36,11 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
