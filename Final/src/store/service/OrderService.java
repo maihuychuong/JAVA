@@ -140,12 +140,21 @@ public class OrderService {
     private void payment(Order order, Scanner scanner) {
         System.out.println("Thanh toán đơn hàng: ");
         System.out.println("Nhập thông tin tài khoản ngân hàng:");
-        System.out.println("Tên ngân hàng: ");
+        System.out.println("Tên ngân hàng: (VPBank/Vietcombank/Techcombank/Vietinbank/BIDV/MBBank/ACB/Agribank/HDBank/TPBank)");
         String bankName = Utils.inputString(scanner);
+        while (!Database.bankNames.contains(bankName)){
+            System.out.println("Tên ngân hàng vùa nhập không tồn tại trong nhưng ngân hàng được cho phép. Vui lòng nhập lại.");
+            bankName = Utils.inputString(scanner);
+        }
         System.out.println("Số tài khoản: ");
         String accountNumber = Utils.inputString(scanner);
+        while (!Utils.conditionAccountNumber(accountNumber)){
+            System.out.println("Số tài khoản vừa nhập không hợp lệ. Vui lòng nhập lại");
+            accountNumber = Utils.inputString(scanner);
+        }
         System.out.println("Chuyển khoản thành công.");
         order.setOrderStatus("Đã thanh toán.");
+        System.out.println(order.getOrderStatus());
     }
 
     //    Người bán xử lý đơn hàng

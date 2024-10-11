@@ -14,13 +14,15 @@ public class UserService {
         String username = Utils.inputString(scanner);
         System.out.println("Nhập email: ");
         String email = Utils.inputString(scanner);
-        if (!Utils.conditionEmail(email)) {
+        while (!Utils.conditionEmail(email)) {
             System.out.println("Email không hợp lệ. Vui lòng nhập email đúng định dạng.");
+            email = Utils.inputString(scanner);
         }
         System.out.println("Nhập password: ");
         String password = Utils.inputString(scanner);
-        if (!Utils.conditionPassword(password)) {
+        while (!Utils.conditionPassword(password)) {
             System.out.println("Mật khẩu không hợp lệ. Mật khẩu phải chứa ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt và có độ dài từ 7 đến 15 ký tự.");
+            password = Utils.inputString(scanner);
         }
         while (true) {
             System.out.println("Nhập vai trò: (Seller/Customer)");
@@ -31,8 +33,10 @@ public class UserService {
                 if (findUserByUsernameAndEmail(username, email) == null) {
                     Database.users.add(new User(username, password, email, role));
                     System.out.println("Đăng lý thành công");
+                    break;
                 } else {
                     System.out.println("Username hoặc email đã tồn tại ");
+                    break;
                 }
             }
         }
