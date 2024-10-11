@@ -82,7 +82,7 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "\n" + "Order{" +
                 "id=" + id +
                 ", productsCart=" + productsCart +
                 ", buyer='" + buyer + '\'' +

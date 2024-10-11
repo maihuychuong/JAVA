@@ -16,4 +16,11 @@ public class Cart {
     public void setProductsCart(Map<Integer, Integer> productsCart) {
         this.productsCart = productsCart;
     }
+
+    @Override
+    public String toString() {
+        return "\n" + "Cart{" +
+                "productsCart=" + productsCart +
+                '}';
+    }
 }
