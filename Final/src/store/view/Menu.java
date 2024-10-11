@@ -14,7 +14,9 @@ public class Menu {
     UserService userService = new UserService();
     ProductService productService = new ProductService();
     CartService cartService = new CartService();
-    OrderService orderService =new OrderService();
+    OrderService orderService = new OrderService();
+
+    //    Menu trước khi đăng nhập
     public void preLogin(Scanner scanner) {
         System.out.println("1 - Đăng nhập");
         System.out.println("2 - Đăng ký");
@@ -23,6 +25,7 @@ public class Menu {
         selectPreLogin(scanner);
     }
 
+    //    Lựa chọn Menu trước khi đăng nhập
     private void selectPreLogin(Scanner scanner) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -30,8 +33,12 @@ public class Menu {
                 System.out.println("Thực hiện login");
                 User user = userService.login(scanner);
                 if (user != null) {
-                    System.out.println("Chào mừng " + user.getUsername() + " , bạn có thể thực hiện các công việc sau: ");
-                    postLogin(scanner, user);
+                    if (user.isLocked()) {
+                        System.out.println("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với admin.");
+                    } else {
+                        System.out.println("Chào mừng " + user.getUsername() + " , bạn có thể thực hiện các công việc sau: ");
+                        postLogin(scanner, user);
+                    }
                 } else {
                     System.out.println("Username hoặc password không đúng");
                     forgotPassword(scanner);
@@ -44,9 +51,14 @@ public class Menu {
                 break;
             case 3:
                 System.exit(0);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                preLogin(scanner);
         }
     }
 
+    //    Menu sau khi đăng nhập
     private void postLogin(Scanner scanner, User user) {
         System.out.println("1 - Hiển thị menu");
         System.out.println("2 - Cập nhật tài khoản cá nhân");
@@ -55,6 +67,7 @@ public class Menu {
         selectPostLogin(scanner, user);
     }
 
+    //    Lựa chọn Menu sau khi đăng nhập
     private void selectPostLogin(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -75,18 +88,26 @@ public class Menu {
             case 3:
                 System.out.println("Thực hiện đăng xuất");
                 preLogin(scanner);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                postLogin(scanner, user);
         }
     }
 
+    //    Menu cập nhập tài khoản của người dùng
     private void userMenu(Scanner scanner, User user) {
-        System.out.println("1 - Thay đổi username");
-        System.out.println("2 - Thay đổi email");
-        System.out.println("3 - Thay đổi password");
-        System.out.println("4 - Quay lại");
-        System.out.println("Mời lựa chọn: ");
-        selectUserMenu(scanner, user);
+        while (true) {
+            System.out.println("1 - Thay đổi username");
+            System.out.println("2 - Thay đổi email");
+            System.out.println("3 - Thay đổi password");
+            System.out.println("4 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectUserMenu(scanner, user);
+        }
     }
 
+    //    Lựa chọn Menu cập nhập tài khoản của người dùng
     private void selectUserMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -108,9 +129,14 @@ public class Menu {
             case 4:
                 System.out.println("Thực hiện quay lại");
                 postLogin(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                userMenu(scanner, user);
         }
     }
 
+    //    Menu quên mật khẩu
     private void forgotPassword(Scanner scanner) {
         System.out.println("1 - Đăng nhập lại.");
         System.out.println("2 - Quên mật khẩu");
@@ -118,6 +144,7 @@ public class Menu {
         selectForgotPassword(scanner);
     }
 
+    //    Lựa chọn Menu quên mật khẩu
     private void selectForgotPassword(Scanner scanner) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -130,9 +157,14 @@ public class Menu {
                 userService.resetPassword(scanner);
                 System.out.println("Password đã được thay đổi thành công. Vui lòng đăng nhập lại: ");
                 userService.login(scanner);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                forgotPassword(scanner);
         }
     }
 
+    //    Menu người bán
     private void sellerMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Quản lý sản phẩm");
@@ -144,6 +176,7 @@ public class Menu {
         }
     }
 
+    //    Lựa chọn Menu người bán
     private void selectSellerMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -155,13 +188,18 @@ public class Menu {
                 break;
             case 3:
                 System.out.println("Thực hiện hiển thị doanh thu của người bán: ");
-                orderService.displayRevenue(user);
+                orderService.displayRevenueForSeller(user);
                 break;
             case 4:
                 postLogin(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                sellerMenu(scanner, user);
         }
     }
 
+    //    Menu quản lí sản phẩm của người bán
     private void productSellerMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Hiển thị danh sách sản phẩm");
@@ -174,6 +212,7 @@ public class Menu {
         }
     }
 
+    //    Lựa chọn Menu quản lí sản phẩm của người bán
     private void selectProductSellerMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -198,10 +237,15 @@ public class Menu {
                 break;
             case 5:
                 sellerMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                productSellerMenu(scanner, user);
         }
     }
 
-    private void orderMenu(Scanner scanner, User user){
+    //    Menu quản lí đơn hàng của người bán
+    private void orderMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Hiển thị danh sách đơn hàng");
             System.out.println("2 - Xử lý đơn hàng");
@@ -211,21 +255,28 @@ public class Menu {
         }
     }
 
-    private void selectOrderMenu(Scanner scanner, User user){
+    //   Lựa chọn Menu quản lí đơn hàng của người bán
+    private void selectOrderMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
                 System.out.println("Thực hiện hiển thị danh sách đơn hàng");
-                orderService.displayOrder(user);
+                orderService.displayOrderForSeller(user);
                 break;
             case 2:
                 System.out.println("Thực hiện xử lý đơn hàng");
+                orderService.processOrder(scanner, user);
                 break;
             case 3:
                 sellerMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                orderMenu(scanner, user);
         }
     }
 
+    //    Menu người mua
     private void customerMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Duyệt sản phẩm");
@@ -237,6 +288,7 @@ public class Menu {
         }
     }
 
+    //    Lựa chọn Menu người mua
     private void selectCustomerMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -251,9 +303,14 @@ public class Menu {
                 break;
             case 4:
                 postLogin(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                customerMenu(scanner, user);
         }
     }
 
+    //    Menu duyệt sản phẩm
     private void productCustomerMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Hiển thị danh sách sản phẩm");
@@ -266,6 +323,7 @@ public class Menu {
         }
     }
 
+    //    Lựa chọn Menu duyệt sản phẩm
     private void selectProductCustomerMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -287,9 +345,14 @@ public class Menu {
                 break;
             case 5:
                 postLogin(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                productCustomerMenu(scanner, user);
         }
     }
 
+    //    Duyệt sản phẩm theo giá
     private void filterByPrice(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Dưới 100.000Đ");
@@ -302,6 +365,7 @@ public class Menu {
 
     }
 
+    //    Lựa chọn duyệt sản phẩm theo giá
     private void selectFilterPrice(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
@@ -319,10 +383,16 @@ public class Menu {
                 break;
             case 4:
                 productCustomerMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                filterByPrice(scanner, user);
         }
     }
-    private void cartMenu(Scanner scanner, User user){
-        while (true){
+
+    //    Menu quản lí giỏ hàng
+    private void cartMenu(Scanner scanner, User user) {
+        while (true) {
             System.out.println("1 - Thêm sản phẩm");
             System.out.println("2 - Xóa sản phẩm");
             System.out.println("3 - Danh sách sản phẩm trong giỏ hàng");
@@ -334,7 +404,9 @@ public class Menu {
         }
 
     }
-    private void selectCartMenu(Scanner scanner, User user){
+
+    //    Lựa chọn Menu quản lí giỏ hàng
+    private void selectCartMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
@@ -360,11 +432,16 @@ public class Menu {
                 break;
             case 6:
                 customerMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                cartMenu(scanner, user);
         }
     }
 
-    private void adminMenu(Scanner scanner, User user){
-        while (true){
+    //    Menu admin
+    private void adminMenu(Scanner scanner, User user) {
+        while (true) {
             System.out.println("1 - Quản lí người dùng");
             System.out.println("2 - Quản lí sản phẩm");
             System.out.println("3 - Quản lí đơn hàng");
@@ -375,19 +452,132 @@ public class Menu {
         }
     }
 
-    private void selectAdminMenu(Scanner scanner, User user){
+    //    Lựa chọn Menu admin
+    private void selectAdminMenu(Scanner scanner, User user) {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
+                userManagerMenu(scanner, user);
                 break;
             case 2:
+                productManagerMenu(scanner, user);
                 break;
             case 3:
+                orderManagerMenu(scanner, user);
                 break;
             case 4:
+                System.out.println("Thực hiện thống kê doanh thu");
+                orderService.displayRevenueForAdmin();
                 break;
             case 5:
                 postLogin(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                adminMenu(scanner, user);
+        }
+    }
+
+    //    Menu quản lí người dùng admin
+    private void userManagerMenu(Scanner scanner, User user) {
+        while (true) {
+            System.out.println("1 - Danh sách người dùng");
+            System.out.println("2 - Thay đổi quyền của người dùng");
+            System.out.println("3 - Khóa/Mở khóa tài khoản người dùng");
+            System.out.println("4 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectUserManagerMenu(scanner, user);
+        }
+    }
+
+    //    Lựa chọn Menu quản lí người dùng admin
+    private void selectUserManagerMenu(Scanner scanner, User user) {
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiển hiển thị danh sách người dùng");
+                System.out.println(Database.users);
+                break;
+            case 2:
+                System.out.println("Thực hiển thay đổi quyền của người dùng");
+                userService.changeUserRole(scanner);
+                break;
+            case 3:
+                System.out.println("Thực hiện Khóa/Mở khóa tài khoản người dùng");
+                userService.lockUnlockAccount(scanner);
+                break;
+            case 4:
+                adminMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                userManagerMenu(scanner, user);
+        }
+    }
+
+    //    Menu quản lí sản phẩm admin
+    private void productManagerMenu(Scanner scanner, User user) {
+        while (true) {
+            System.out.println("1 - Danh sách sản phẩm");
+            System.out.println("2 - Xóa sản phẩm");
+            System.out.println("3 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectProductManagerMenu(scanner, user);
+        }
+    }
+
+    //    Lựa chọn Menu quản lí sản phẩm admin
+    private void selectProductManagerMenu(Scanner scanner, User user) {
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiển hiển thị danh sách sản phẩm");
+                System.out.println(Database.products);
+                break;
+            case 2:
+                System.out.println("Thực hiển xóa sản phẩm");
+                productService.editProduct(scanner, false, user);
+                System.out.println("Xóa sant phẩm thành công");
+                break;
+            case 3:
+                adminMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                productManagerMenu(scanner, user);
+        }
+    }
+
+    //    Menu quản lí đơn hàng admin
+    private void orderManagerMenu(Scanner scanner, User user) {
+        while (true) {
+            System.out.println("1 - Danh sách đơn hàng");
+            System.out.println("2 - Xóa đơn hàng");
+            System.out.println("3 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selecOrderManagerMenu(scanner, user);
+        }
+    }
+
+    //    Lựa chọn Menu quản lí đơn hàng admin
+    private void selecOrderManagerMenu(Scanner scanner, User user) {
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiển hiển thị danh sách đơn hàng");
+                System.out.println(Database.orders);
+                break;
+            case 2:
+                System.out.println("Thực hiển xóa đơn hàng");
+                orderService.deleteOrder(scanner);
+                System.out.println("Xóa đơn hàng thành công");
+                break;
+            case 3:
+                adminMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                orderManagerMenu(scanner, user);
         }
     }
 }

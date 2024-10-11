@@ -5,12 +5,14 @@ public class User {
     private String password;
     private String email;
     private String role;
+    private boolean isLocked;
 
     public User(String username, String password, String email, String role) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.role = role;
+        this.isLocked = false;
     }
 
     public String getUsername() {
@@ -43,5 +45,24 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                ", isLocked=" + isLocked +
+                '}';
     }
 }

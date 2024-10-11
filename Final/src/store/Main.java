@@ -1,6 +1,5 @@
 package store;
 
-
 import store.view.Menu;
 
 import java.util.Scanner;
