@@ -138,7 +138,8 @@ public class ProductService {
         }
     }
 
-    public void displaySellerProduct(User user){
+    //    Hiển thị sản phẩm mà người bán đang bán
+    public void displaySellerProduct(User user) {
         List<Product> productsBySeller = findAllProductsBySeller(user.getUsername());
         if (productsBySeller.isEmpty()) {
             System.out.println("Không có sản phẩm nào từ người bán " + user.getUsername());

@@ -286,8 +286,8 @@ public class Menu {
         while (true) {
             System.out.println("1 - Duyệt sản phẩm");
             System.out.println("2 - Quản lý giỏ hàng");
-            System.out.println("4 - Xem lịch sử mua hàng");
-            System.out.println("5 - Quay lại");
+            System.out.println("3 - Xem lịch sử mua hàng");
+            System.out.println("4 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectCustomerMenu(scanner, user);
         }
@@ -398,12 +398,13 @@ public class Menu {
     //    Menu quản lí giỏ hàng
     private void cartMenu(Scanner scanner, User user) {
         while (true) {
-            System.out.println("1 - Thêm sản phẩm");
-            System.out.println("2 - Xóa sản phẩm");
-            System.out.println("3 - Danh sách sản phẩm trong giỏ hàng");
-            System.out.println("4 - Xác nhận đơn hàng");
-            System.out.println("5 - Hủy giỏ hàng");
-            System.out.println("6 - Quay lại");
+            System.out.println("1 - Hiển thị danh sách sản phẩm");
+            System.out.println("2 - Thêm sản phẩm");
+            System.out.println("3 - Xóa sản phẩm");
+            System.out.println("4 - Danh sách sản phẩm trong giỏ hàng");
+            System.out.println("5 - Xác nhận đơn hàng");
+            System.out.println("6 - Hủy giỏ hàng");
+            System.out.println("7 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectCartMenu(scanner, user);
         }
@@ -415,28 +416,43 @@ public class Menu {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
+                System.out.println("Thực hiện hiển thị danh sách sản phẩm");
+                System.out.println(Database.products);
+                break;
+            case 2:
                 System.out.println("Thực hiện thêm sản phẩm vào đơn hàng");
                 cartService.addProductToCart(scanner);
                 break;
-            case 2:
+            case 3:
                 System.out.println("Thực hiện xóa sản phẩm khỏi đơn hàng");
                 cartService.removeProductFromCart(scanner);
                 break;
-            case 3:
+            case 4:
                 System.out.println("Thực hiện hiển thị các sản phẩm trong giỏ hàng");
                 cartService.displayCart();
                 break;
-            case 4:
+            case 5:
                 System.out.println("Thực hiện xác nhận đơn hàng");
                 orderService.confirmOrder(scanner, user);
                 break;
-            case 5:
+            case 6:
                 System.out.println("Thực hiện hủy giỏ hàng");
                 cartService.deleteCart();
                 System.out.println("Hủy giỏ hàng thành công");
                 break;
-            case 6:
-                customerMenu(scanner, user);
+            case 7:
+                System.out.println("Nếu thoát giỏ hàng của bạn sẽ bị xóa tự động, bạn có muốn quay lại? (Y/N)");
+                String confirm = Utils.inputString(scanner);
+                while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
+                    System.out.println("Lựa chọn bạn nhập không hợp lệ. Vui lòng thử lại.");
+                    confirm = Utils.inputString(scanner);
+                }
+                if (confirm.equalsIgnoreCase("Y")){
+                    cartService.deleteCart();
+                    customerMenu(scanner, user);
+                } else if (confirm.equalsIgnoreCase("N")){
+                    cartMenu(scanner, user);
+                }
                 break;
             default:
                 System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");

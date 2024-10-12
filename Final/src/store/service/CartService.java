@@ -78,4 +78,7 @@ public class CartService {
     public void deleteCart() {
         Database.productsCart.clear();
     }
+
+    public void autoDeleteCart(Scanner scanner){
+    }
 }
