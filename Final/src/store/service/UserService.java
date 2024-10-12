@@ -33,11 +33,10 @@ public class UserService {
                 if (findUserByUsernameAndEmail(username, email) == null) {
                     Database.users.add(new User(username, password, email, role));
                     System.out.println("Đăng lý thành công");
-                    break;
                 } else {
                     System.out.println("Username hoặc email đã tồn tại ");
-                    break;
                 }
+                break;
             }
         }
     }
@@ -100,11 +99,9 @@ public class UserService {
     public void changeUsername(Scanner scanner, User user) {
         System.out.println("Nhập username mới: ");
         String username = Utils.inputString(scanner);
-        ;
         while (findUserByUsername(username) != null) {
             System.out.println("Username đã tồn tại. Nhập lại username mới: ");
             username = Utils.inputString(scanner);
-            ;
         }
         user.setUsername(username);
         System.out.println("Username đã được thay đổi thành công.");
@@ -129,11 +126,9 @@ public class UserService {
     public void changePassword(Scanner scanner, User user) {
         System.out.println("Nhập password mới: ");
         String password = Utils.inputString(scanner);
-        ;
         while (!Utils.conditionPassword(password)) {
             System.out.println("Password không hợp lệ. Nhập lại password mới: ");
             password = Utils.inputString(scanner);
-            ;
         }
         user.setPassword(password);
     }
@@ -142,12 +137,10 @@ public class UserService {
     public void resetPassword(Scanner scanner) {
         System.out.println("Nhập email của tài khoản cần reset mật khẩu: ");
         String email = Utils.inputString(scanner);
-        ;
         User user = findUserByEmail(email);
         while (user == null) {
             System.out.println("Email không tồn tại. Nhập lại email: ");
             email = Utils.inputString(scanner);
-            ;
             user = findUserByEmail(email);
         }
         changePassword(scanner, user);
@@ -190,7 +183,6 @@ public class UserService {
                 while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
                     System.out.println("Lựa chọn bạn nhập không hợp lệ. Vui lòng thử lại.");
                     confirm = Utils.inputString(scanner);
-                    ;
                 }
                 if (confirm.equalsIgnoreCase("Y")) {
                     user.setLocked(false);
@@ -204,7 +196,6 @@ public class UserService {
                 while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
                     System.out.println("Lựa chọn bạn nhập không hợp lệ. Vui lòng thử lại.");
                     confirm = Utils.inputString(scanner);
-                    ;
                 }
                 if (confirm.equalsIgnoreCase("Y")) {
                     user.setLocked(true);

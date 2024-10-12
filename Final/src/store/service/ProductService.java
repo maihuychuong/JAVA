@@ -137,4 +137,14 @@ public class ProductService {
             System.out.println(productsSeller);
         }
     }
+
+    public void displaySellerProduct(User user){
+        List<Product> productsBySeller = findAllProductsBySeller(user.getUsername());
+        if (productsBySeller.isEmpty()) {
+            System.out.println("Không có sản phẩm nào từ người bán " + user.getUsername());
+        } else {
+            System.out.println("Danh sách sản phẩm của " + user.getUsername() + " :");
+            System.out.println(productsBySeller);
+        }
+    }
 }

@@ -150,7 +150,7 @@ public class Menu {
         switch (choice) {
             case 1:
                 System.out.println("Vui lòng đăng nhập lại: ");
-                userService.login(scanner);
+                preLogin(scanner);
                 break;
             case 2:
                 System.out.println("Thực hiện reset password: ");
@@ -202,11 +202,12 @@ public class Menu {
     //    Menu quản lí sản phẩm của người bán
     private void productSellerMenu(Scanner scanner, User user) {
         while (true) {
-            System.out.println("1 - Hiển thị danh sách sản phẩm");
-            System.out.println("2 - Thêm sản phẩm");
-            System.out.println("3 - Cập nhât sản phẩm");
-            System.out.println("4 - Xóa sản phẩm");
-            System.out.println("5 - Quay lại");
+            System.out.println("1 - Hiển thị danh sách tất cả sản phẩm");
+            System.out.println("2 - Hiển thị danh sách sản phẩm mình bán");
+            System.out.println("3 - Thêm sản phẩm");
+            System.out.println("4 - Cập nhât sản phẩm");
+            System.out.println("5 - Xóa sản phẩm");
+            System.out.println("6 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectProductSellerMenu(scanner, user);
         }
@@ -217,25 +218,29 @@ public class Menu {
         int choice = Utils.inputInt(scanner);
         switch (choice) {
             case 1:
-                System.out.println("Thực hiện hiển thị danh sách sản phẩm");
+                System.out.println("Thực hiện hiển thị danh sách tất cả sản phẩm");
                 System.out.println(Database.products);
                 break;
             case 2:
+                System.out.println("Thực hiện hiển thị danh sách sản phẩm mình bán");
+                productService.displaySellerProduct(user);
+                break;
+            case 3:
                 System.out.println("Thực hiện thêm sản phẩm");
                 productService.addProduct(scanner, user);
                 System.out.println("Thêm sản phẩm thành công");
                 break;
-            case 3:
+            case 4:
                 System.out.println("Thực hiện cập nhật sản phẩm");
                 productService.editProduct(scanner, true, user);
                 System.out.println("Cập nhật sản phẩm thành công");
                 break;
-            case 4:
+            case 5:
                 System.out.println("Thực hiện xóa sản phẩm");
                 productService.editProduct(scanner, false, user);
                 System.out.println("Xóa sản phẩm thành công");
                 break;
-            case 5:
+            case 6:
                 sellerMenu(scanner, user);
                 break;
             default:
