@@ -76,9 +76,7 @@ public class CartService {
 
     //   Xóa toàn bộ sản phẩm khỏi giỏ hàng (Hủy giỏ hàng)
     public void deleteCart() {
+        checkEmptyCart();
         Database.productsCart.clear();
-    }
-
-    public void autoDeleteCart(Scanner scanner){
     }
 }

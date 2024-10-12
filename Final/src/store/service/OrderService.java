@@ -187,7 +187,7 @@ public class OrderService {
                 confirm = Utils.inputString(scanner);
             }
             if (confirm.equalsIgnoreCase("Y")) {
-                order.setOrderStatus("Hàng đang được giao");  // Consider using a constant or enum for statuses
+                order.setOrderStatus("Hàng đang được giao");
                 System.out.println("Đơn hàng đã được xác nhận và gửi.");
             } else {
                 System.out.println("Đơn hàng không được xác nhận gửi.");

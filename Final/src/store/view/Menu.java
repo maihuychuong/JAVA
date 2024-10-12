@@ -320,8 +320,8 @@ public class Menu {
         while (true) {
             System.out.println("1 - Hiển thị danh sách sản phẩm");
             System.out.println("2 - Tìm kiếm sản phầm theo tên");
-            System.out.println("2 - Tìm kiếm sản phầm theo khoảng giá");
-            System.out.println("2 - Tìm kiếm sản phầm theo tên người bán");
+            System.out.println("3 - Tìm kiếm sản phầm theo khoảng giá");
+            System.out.println("4 - Tìm kiếm sản phầm theo tên người bán");
             System.out.println("5 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectProductCustomerMenu(scanner, user);
@@ -349,7 +349,7 @@ public class Menu {
                 productService.filterBySeller(scanner);
                 break;
             case 5:
-                postLogin(scanner, user);
+                customerMenu(scanner, user);
                 break;
             default:
                 System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
