@@ -8,6 +8,7 @@ import store.utils.Utils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class OrderService {
@@ -16,13 +17,15 @@ public class OrderService {
 
     //    Xác nhận đơn hàng
     public void confirmOrder(Scanner scanner, User user) {
-        cartService.checkEmptyCart();
+        cartService.checkEmptyCart(user);
         System.out.println("Nhập thông tin đơn hàng: ");
         System.out.println("Địa chỉ giao hàng: ");
         String shippingAddress = Utils.inputString(scanner);
         LocalDateTime orderDate = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String formattedDate = orderDate.format(formatter);
         System.out.println("Đơn hàng của bạn: ");
-        cartService.displayCart();
+        cartService.displayCart(user);
         System.out.println("Xác nhận đơn hàng: (Y/N)");
         String confirm = Utils.inputString(scanner);
         while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
@@ -30,36 +33,43 @@ public class OrderService {
             confirm = Utils.inputString(scanner);
         }
         if (confirm.equalsIgnoreCase("Y")) {
-            for (Map.Entry<Integer, Integer> entry : Database.productsCart.entrySet()) {
-                int id = entry.getKey();
-                int quantityCart = entry.getValue();
-                Product product = productService.findProductById(id);
-                if (product != null) {
-                    product.setQuantity(product.getQuantity() - quantityCart);
+            Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+
+            if (currentCart != null) {
+                for (Map.Entry<Integer, Integer> entry : currentCart.entrySet()) {
+                    int id = entry.getKey();
+                    int quantityCart = entry.getValue();
+                    Product product = productService.findProductById(id);
+                    if (product != null) {
+                        product.setQuantity(product.getQuantity() - quantityCart);
+                    }
                 }
+                Order order = new Order(new HashMap<>(currentCart), user.getUsername(), calculateTotalPrice(user), formattedDate, shippingAddress);
+                Database.orders.add(order);
+                System.out.println("Đơn hàng của bạn đã được xác nhận thành công. Thông tin đơn hàng: ");
+                System.out.println(order);
+                System.out.println("------------------------------------------------------------------");
+                payment(order, scanner);
+                cartService.deleteCart(user);
             }
-            Order order = new Order(new HashMap<>(Database.productsCart), user.getUsername(), calculateTotalPrice(), orderDate, shippingAddress);
-            Database.orders.add(order);
-            System.out.println("Đơn hàng của bạn đã được xác nhận thành công. Thông tin đơn hàng: ");
-            System.out.println(order);
-            System.out.println("------------------------------------------------------------------");
-            payment(order, scanner);
-            cartService.deleteCart();
         } else if (confirm.equalsIgnoreCase("N")) {
-            System.out.println("Hủy xác nhận đơn hàng. thành công.");
+            System.out.println("Hủy xác nhận đơn hàng thành công.");
         }
     }
 
     //    Tính tổng số tiền của đơn hàng
-    private BigDecimal calculateTotalPrice() {
+    private BigDecimal calculateTotalPrice(User user) {
         BigDecimal totalPrice = new BigDecimal(0);
-        for (Map.Entry<Integer, Integer> entry : Database.productsCart.entrySet()) {
-            int id = entry.getKey();
-            int quantityCart = entry.getValue();
-            Product product = productService.findProductById(id);
-            if (product != null) {
-                BigDecimal quantity = new BigDecimal(quantityCart);
-                totalPrice = totalPrice.add(product.getPrice().multiply(quantity));
+        Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+        if (currentCart != null) {
+            for (Map.Entry<Integer, Integer> entry : currentCart.entrySet()) {
+                int id = entry.getKey();
+                int quantityCart = entry.getValue();
+                Product product = productService.findProductById(id);
+                if (product != null) {
+                    BigDecimal quantity = new BigDecimal(quantityCart);
+                    totalPrice = totalPrice.add(product.getPrice().multiply(quantity));
+                }
             }
         }
         return totalPrice;
@@ -70,13 +80,29 @@ public class OrderService {
         System.out.println("Lịch sử mua hàng của người dùng " + user.getUsername() + " :");
         List<Order> ordersBuyer = findAllOrderByBuyer(user);
         if (ordersBuyer.isEmpty()) {
-            System.out.println("Lịch sử giao dịch của bạn trống");
+            System.out.println("Lịch sử giao dịch của bạn trống.");
         } else {
             for (Order order : ordersBuyer) {
-                System.out.println(order);
+                System.out.println("Đơn hàng ID: " + order.getId());
+                System.out.println("Ngày đặt hàng: " + order.getOrderDate());
+                System.out.println("Địa chỉ giao hàng: " + order.getShippingAddress());
+                System.out.println("Tổng giá: " + order.getTotalPrice());
+                System.out.println("Trạng thái: " + order.getOrderStatus());
+                if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                    System.out.println("Lý do hủy: " + order.getCancellationReason());
+                }
+                System.out.println("Sản phẩm trong đơn hàng: ");
+                for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
+                    int productId = entry.getKey();
+                    int quantity = entry.getValue();
+                    Product product = productService.findProductById(productId);
+                    if (product != null) {
+                        System.out.println(" - Tên: " + product.getName() + ", Số lượng: " + quantity);
+                    }
+                }
+                System.out.println("------------------------------------------------------------------");
             }
         }
-
     }
 
     //    Tìm kiếm đơn hàng bằng tên người mua
@@ -87,43 +113,49 @@ public class OrderService {
                 ordersBuyer.add(order);
             }
         }
+        if (ordersBuyer.isEmpty()) {
+            System.out.println("Không tìm thấy đơn hàng nào cho người dùng: " + user.getUsername());
+        }
         return ordersBuyer;
     }
 
     //    Hiển thị đơn hàng của người bán sau khi người mua đã xác nhận đơn hàng
     public void displayOrderForSeller(User user) {
-        System.out.println("Danh sách đơn hàng của người dùng " + user.getUsername() + " :");
+        System.out.println("Danh sách đơn hàng của người bán " + user.getUsername() + " :");
         boolean hasOrders = false;
         for (Order order : Database.orders) {
-            boolean hasSellerProduct = false;
-            for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
-                int id = entry.getKey();
-                Product product = productService.findProductById(id);
-                if (product != null && product.getSeller().equalsIgnoreCase(user.getUsername())) {
-                    hasSellerProduct = true;
-                    break;
-                }
-            }
-            if (hasSellerProduct) {
+            if (containsSellerProduct(order, user.getUsername())) {
                 System.out.println(order);
                 hasOrders = true;
             }
         }
         if (!hasOrders) {
-            System.out.println("Bạn không có đơn hàng nào");
+            System.out.println("Bạn không có đơn hàng nào.");
         }
+    }
+
+    //    Kiểm tra xem đơn hàng có sản phẩm nào của người bán không
+    private boolean containsSellerProduct(Order order, String sellerUsername) {
+        for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
+            int id = entry.getKey();
+            Product product = productService.findProductById(id);
+            if (product != null && product.getSeller().equalsIgnoreCase(sellerUsername)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //    Hiển thị doanh thu của người bán
     public void displayRevenueForSeller(User user) {
-        BigDecimal totalRevenue = new BigDecimal(0);
+        BigDecimal totalRevenue = BigDecimal.ZERO;
         Map<String, Integer> productSaleCount = new HashMap<>();
         for (Order order : Database.orders) {
             for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
                 int id = entry.getKey();
                 Product product = productService.findProductById(id);
                 if (product != null && product.getSeller().equalsIgnoreCase(user.getUsername())) {
-                    BigDecimal productRevenue = product.getPrice().multiply(new BigDecimal(entry.getValue()));
+                    BigDecimal productRevenue = product.getPrice().multiply(BigDecimal.valueOf(entry.getValue()));
                     totalRevenue = totalRevenue.add(productRevenue);
                     productSaleCount.put(product.getName(), productSaleCount.getOrDefault(product.getName(), 0) + entry.getValue());
                 }
@@ -142,9 +174,23 @@ public class OrderService {
         System.out.println("Nhập thông tin tài khoản ngân hàng:");
         System.out.println("Tên ngân hàng: (VPBank/Vietcombank/Techcombank/Vietinbank/BIDV/MBBank/ACB/Agribank/HDBank/TPBank)");
         String bankName = Utils.inputString(scanner);
-        while (!Database.bankNames.contains(bankName)){
-            System.out.println("Tên ngân hàng vùa nhập không tồn tại trong nhưng ngân hàng được cho phép. Vui lòng nhập lại.");
+        boolean validBankName = false;
+        for (String validBank : Database.bankNames) {
+            if (validBank.equalsIgnoreCase(bankName)) {
+                validBankName = true;
+                break;
+            }
+        }
+        while (!validBankName) {
+            System.out.println("Tên ngân hàng vừa nhập không tồn tại trong những ngân hàng được cho phép. Vui lòng nhập lại.");
             bankName = Utils.inputString(scanner);
+            validBankName = false;
+            for (String validBank : Database.bankNames) {
+                if (validBank.equalsIgnoreCase(bankName)) {
+                    validBankName = true;
+                    break;
+                }
+            }
         }
         System.out.println("Số tài khoản: ");
         String accountNumber = Utils.inputString(scanner);
@@ -153,8 +199,8 @@ public class OrderService {
             accountNumber = Utils.inputString(scanner);
         }
         System.out.println("Chuyển khoản thành công.");
-        order.setOrderStatus("Đã thanh toán.");
-        System.out.println(order.getOrderStatus());
+        order.setOrderStatus(OrderStatus.PAID);
+        System.out.println("Trạng thái đơn hàng: " + order.getOrderStatus().getDisplayName());
     }
 
     //    Người bán xử lý đơn hàng
@@ -163,7 +209,7 @@ public class OrderService {
         int id = Utils.inputInt(scanner);
         Order order = findOrderById(id);
         while (order == null) {
-            System.out.println("Khồn có đơn hàng nào với id " + id + " tồn tại. Vui lòng thử lại");
+            System.out.println("Không có đơn hàng nào với ID " + id + " tồn tại. Vui lòng thử lại.");
             id = Utils.inputInt(scanner);
             order = findOrderById(id);
         }
@@ -180,21 +226,31 @@ public class OrderService {
             System.out.println("Đơn hàng này có sản phẩm của bạn. Thông tin đơn hàng: ");
             System.out.println(order);
             System.out.println("Xác nhận gửi hàng cho đơn hàng này? (Y/N): ");
-
             String confirm = Utils.inputString(scanner);
             while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
                 System.out.println("Lựa chọn bạn nhập không hợp lệ. Vui lòng thử lại.");
                 confirm = Utils.inputString(scanner);
             }
             if (confirm.equalsIgnoreCase("Y")) {
-                order.setOrderStatus("Hàng đang được giao");
+                order.setOrderStatus(OrderStatus.SHIPPED);
                 System.out.println("Đơn hàng đã được xác nhận và gửi.");
-            } else {
-                System.out.println("Đơn hàng không được xác nhận gửi.");
+            } else if (confirm.equalsIgnoreCase("N")){
+                order.setOrderStatus(OrderStatus.CANCELED);
+                System.out.println("Đơn hàng đã bị hủy.");
+                System.out.println("Nhập lý do hủy đơn hàng: ");
+                String cancellationReason = Utils.inputString(scanner);
+                order.setCancellationReason(cancellationReason);
+                System.out.println("Lý do hủy: " + cancellationReason);
+                refundUser(order.getBuyer(), order.getTotalPrice());
             }
         } else {
             System.out.println("Đơn hàng này không có sản phẩm của bạn.");
         }
+    }
+
+    //    Hoàn trả tiền cho người mua
+    private void refundUser(String buyer, BigDecimal amount) {
+        System.out.println("Hoàn trả số tiền " + amount + " cho người mua " + buyer + ".");
     }
 
     //    Xóa đơn hàng
@@ -203,11 +259,12 @@ public class OrderService {
         int id = Utils.inputInt(scanner);
         Order order = findOrderById(id);
         while (order == null) {
-            System.out.println("Khồn có đơn hàng nào với id " + id + " tồn tại. Vui lòng thử lại");
+            System.out.println("Không có đơn hàng nào với ID " + id + " tồn tại. Vui lòng thử lại.");
             id = Utils.inputInt(scanner);
             order = findOrderById(id);
         }
         Database.orders.remove(order);
+        System.out.println("Đơn hàng với ID " + id + " đã được xóa thành công.");
     }
 
     //    Tìm kiếm đơn hàng bằng ID
@@ -231,10 +288,11 @@ public class OrderService {
                 Product product = productService.findProductById(productId);
                 if (product != null) {
                     String sellerUsername = product.getSeller();
-                    BigDecimal productRevenue = product.getPrice().multiply(new BigDecimal(quantity));
-                    sellerRevenueMap.put(sellerUsername, sellerRevenueMap.getOrDefault(sellerUsername, new BigDecimal(0)).add(productRevenue));
+                    BigDecimal productRevenue = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+                    sellerRevenueMap.put(sellerUsername, sellerRevenueMap.getOrDefault(sellerUsername, BigDecimal.ZERO).add(productRevenue));
                     sellerProductSalesMap.putIfAbsent(sellerUsername, new HashMap<>());
-                    sellerProductSalesMap.get(sellerUsername).put(product.getName(), sellerProductSalesMap.get(sellerUsername).getOrDefault(product.getName(), 0) + quantity);
+                    sellerProductSalesMap.get(sellerUsername).put(product.getName(),
+                            sellerProductSalesMap.get(sellerUsername).getOrDefault(product.getName(), 0) + quantity);
                 }
             }
         }

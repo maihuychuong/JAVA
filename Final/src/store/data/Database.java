@@ -14,6 +14,8 @@ public class Database {
 
     public static Map<Integer, Integer> productsCart = new HashMap<>();
 
+    public static Map<String, Map<Integer, Integer>> userCarts = new HashMap<>();
+
     public static List<Order> orders = new ArrayList<>();
 
     public static List<String> bankNames = new ArrayList<>();

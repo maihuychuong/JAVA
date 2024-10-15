@@ -421,15 +421,15 @@ public class Menu {
                 break;
             case 2:
                 System.out.println("Thực hiện thêm sản phẩm vào đơn hàng");
-                cartService.addProductToCart(scanner);
+                cartService.addProductToCart(scanner, user);
                 break;
             case 3:
                 System.out.println("Thực hiện xóa sản phẩm khỏi đơn hàng");
-                cartService.removeProductFromCart(scanner);
+                cartService.removeProductFromCart(scanner, user);
                 break;
             case 4:
                 System.out.println("Thực hiện hiển thị các sản phẩm trong giỏ hàng");
-                cartService.displayCart();
+                cartService.displayCart(user);
                 break;
             case 5:
                 System.out.println("Thực hiện xác nhận đơn hàng");
@@ -437,22 +437,11 @@ public class Menu {
                 break;
             case 6:
                 System.out.println("Thực hiện hủy giỏ hàng");
-                cartService.deleteCart();
+                cartService.deleteCart(user);
                 System.out.println("Hủy giỏ hàng thành công");
                 break;
             case 7:
-                System.out.println("Nếu thoát giỏ hàng của bạn sẽ bị xóa tự động, bạn có muốn quay lại? (Y/N)");
-                String confirm = Utils.inputString(scanner);
-                while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
-                    System.out.println("Lựa chọn bạn nhập không hợp lệ. Vui lòng thử lại.");
-                    confirm = Utils.inputString(scanner);
-                }
-                if (confirm.equalsIgnoreCase("Y")){
-                    cartService.deleteCart();
-                    customerMenu(scanner, user);
-                } else if (confirm.equalsIgnoreCase("N")){
-                    cartMenu(scanner, user);
-                }
+                customerMenu(scanner, user);
                 break;
             default:
                 System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");

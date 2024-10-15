@@ -2,8 +2,10 @@ package store.service;
 
 import store.data.Database;
 import store.entities.Product;
+import store.entities.User;
 import store.utils.Utils;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -11,7 +13,7 @@ public class CartService {
     ProductService productService = new ProductService();
 
     //    Thêm sản phẩm vào giỏ hàng
-    public void addProductToCart(Scanner scanner) {
+    public void addProductToCart(Scanner scanner, User user) {
         System.out.println("Nhập ID sản phẩm muốn thêm vào giỏ hàng: ");
         int id = Utils.inputInt(scanner);
         Product product = productService.findProductById(id);
@@ -30,32 +32,44 @@ public class CartService {
             }
             quantity = Utils.inputInt(scanner);
         }
-        if (Database.productsCart.containsKey(id)) {
-            int currentQuantity = Database.productsCart.get(id);
-            Database.productsCart.put(id, currentQuantity + quantity);
+        Map<Integer, Integer> currentCart = Database.userCarts.getOrDefault(user.getUsername(),new HashMap<>());
+        if (currentCart.containsKey(id)) {
+            int currentQuantity = currentCart.get(id);
+            currentCart.put(id, currentQuantity + quantity);
         } else {
-            Database.productsCart.put(id, quantity);
+            currentCart.put(id, quantity);
         }
-        System.out.println("Đã thêm " + quantity + " sản phẩm " + product.getName() + " thành công vào giỏ hàng.");
+        Database.userCarts.put(user.getUsername(), currentCart);
+        System.out.println("Đã thêm " + quantity + " sản phẩm " + product.getName() + " vào giỏ hàng của bạn.");
     }
 
     //    Xóa sản phẩm khỏi giỏ hàng
-    public void removeProductFromCart(Scanner scanner) {
+    public void removeProductFromCart(Scanner scanner, User user) {
         System.out.println("Nhập ID sản phẩm muốn xóa khỏi giỏ hàng: ");
         int id = Utils.inputInt(scanner);
-        if (Database.productsCart.containsKey(id)) {
-            Database.productsCart.remove(id);
-            System.out.println("Đã xóa sản phẩm với id " + id + " thành công.");
+        Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+        if (currentCart == null || currentCart.isEmpty()) {
+            System.out.println("Giỏ hàng của bạn đang trống.");
+            return;
+        }
+        if (currentCart.containsKey(id)) {
+            currentCart.remove(id);
+            System.out.println("Đã xóa sản phẩm với ID " + id + " thành công khỏi giỏ hàng.");
+            Database.userCarts.put(user.getUsername(), currentCart);
         } else {
-            System.out.println("Không có sản phẩm với id " + id + " trong giỏ hàng.");
+            System.out.println("Không có sản phẩm với ID " + id + " trong giỏ hàng của bạn.");
         }
     }
 
     //    Hiển thị các sản phẩm có trong giỏ hàng
-    public void displayCart() {
+    public void displayCart(User user) {
         System.out.println("Giỏ hàng của bạn: ");
-        checkEmptyCart();
-        for (Map.Entry<Integer, Integer> entry : Database.productsCart.entrySet()) {
+        Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+        if (currentCart == null || currentCart.isEmpty()) {
+            System.out.println("Giỏ hàng của bạn đang trống.");
+            return;
+        }
+        for (Map.Entry<Integer, Integer> entry : currentCart.entrySet()) {
             int id = entry.getKey();
             int quantity = entry.getValue();
             Product product = productService.findProductById(id);
@@ -68,15 +82,21 @@ public class CartService {
     }
 
     //    Kiểm tra xem giỏ hàng có trống hay không
-    public void checkEmptyCart() {
-        if (Database.productsCart.isEmpty()) {
-            System.out.println("Không có sản phẩm nào trong giỏ hàng của bạn.");
+    public void checkEmptyCart(User user) {
+        Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+        if (currentCart == null || currentCart.isEmpty()) {
+            throw new IllegalStateException("Giỏ hàng của bạn đang trống. Không thể tiếp tục.");
         }
     }
 
     //   Xóa toàn bộ sản phẩm khỏi giỏ hàng (Hủy giỏ hàng)
-    public void deleteCart() {
-        checkEmptyCart();
-        Database.productsCart.clear();
+    public void deleteCart(User user) {
+        Map<Integer, Integer> currentCart = Database.userCarts.get(user.getUsername());
+        if (currentCart == null || currentCart.isEmpty()) {
+            System.out.println("Giỏ hàng của bạn đã trống.");
+        } else {
+            currentCart.clear();
+            System.out.println("Giỏ hàng đã được xóa thành công.");
+        }
     }
 }

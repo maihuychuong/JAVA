@@ -1,5 +1,7 @@
 package store.entities;
 
+import store.service.OrderStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -10,16 +12,17 @@ public class Order {
     private Map<Integer, Integer> productsCart;
     private String buyer;
     private BigDecimal totalPrice;
-    private String orderStatus;
-    private LocalDateTime orderDate;
+    private OrderStatus orderStatus;
+    private String orderDate;
     private String shippingAddress;
+    private String cancellationReason;
 
-    public Order(Map<Integer, Integer> productsCart, String buyer, BigDecimal totalPrice, LocalDateTime orderDate, String shippingAddress) {
+    public Order(Map<Integer, Integer> productsCart, String buyer, BigDecimal totalPrice, String orderDate, String shippingAddress) {
         this.id = ++autoId;
         this.productsCart = productsCart;
         this.buyer = buyer;
         this.totalPrice = totalPrice;
-        this.orderStatus = "Chờ xử lý, Chưa thanh toán";
+        this.orderStatus = OrderStatus.PENDING;
         this.orderDate = orderDate;
         this.shippingAddress = shippingAddress;
     }
@@ -56,19 +59,19 @@ public class Order {
         this.totalPrice = totalPrice;
     }
 
-    public String getOrderStatus() {
+    public OrderStatus getOrderStatus() {
         return orderStatus;
     }
 
-    public void setOrderStatus(String orderStatus) {
+    public void setOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
     }
 
-    public LocalDateTime getOrderDate() {
+    public String getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
+    public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -78,6 +81,14 @@ public class Order {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public void setCancellationReason(String reason) {
+        this.cancellationReason = reason;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
     }
 
     @Override
