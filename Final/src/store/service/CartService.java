@@ -32,7 +32,7 @@ public class CartService {
             }
             quantity = Utils.inputInt(scanner);
         }
-        Map<Integer, Integer> currentCart = Database.userCarts.getOrDefault(user.getUsername(),new HashMap<>());
+        Map<Integer, Integer> currentCart = Database.userCarts.getOrDefault(user.getUsername(), new HashMap<>());
         if (currentCart.containsKey(id)) {
             int currentQuantity = currentCart.get(id);
             currentCart.put(id, currentQuantity + quantity);

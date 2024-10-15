@@ -194,7 +194,7 @@ public class OrderService {
         }
         System.out.println("Số tài khoản: ");
         String accountNumber = Utils.inputString(scanner);
-        while (!Utils.conditionAccountNumber(accountNumber)){
+        while (!Utils.conditionAccountNumber(accountNumber)) {
             System.out.println("Số tài khoản vừa nhập không hợp lệ. Vui lòng nhập lại");
             accountNumber = Utils.inputString(scanner);
         }
@@ -234,7 +234,7 @@ public class OrderService {
             if (confirm.equalsIgnoreCase("Y")) {
                 order.setOrderStatus(OrderStatus.SHIPPED);
                 System.out.println("Đơn hàng đã được xác nhận và gửi.");
-            } else if (confirm.equalsIgnoreCase("N")){
+            } else if (confirm.equalsIgnoreCase("N")) {
                 order.setOrderStatus(OrderStatus.CANCELED);
                 System.out.println("Đơn hàng đã bị hủy.");
                 System.out.println("Nhập lý do hủy đơn hàng: ");
