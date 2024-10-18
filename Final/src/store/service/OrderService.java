@@ -9,6 +9,7 @@ import store.utils.Utils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class OrderService {
@@ -21,9 +22,9 @@ public class OrderService {
         System.out.println("Nhập thông tin đơn hàng: ");
         System.out.println("Địa chỉ giao hàng: ");
         String shippingAddress = Utils.inputString(scanner);
-        LocalDateTime orderDate = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        String formattedDate = orderDate.format(formatter);
+        String orderDate = now.format(formatter);
         System.out.println("Đơn hàng của bạn: ");
         cartService.displayCart(user);
         System.out.println("Xác nhận đơn hàng: (Y/N)");
@@ -44,7 +45,7 @@ public class OrderService {
                         product.setQuantity(product.getQuantity() - quantityCart);
                     }
                 }
-                Order order = new Order(new HashMap<>(currentCart), user.getUsername(), calculateTotalPrice(user), formattedDate, shippingAddress);
+                Order order = new Order(new HashMap<>(currentCart), user.getUsername(), calculateTotalPrice(user), orderDate, shippingAddress);
                 Database.orders.add(order);
                 System.out.println("Đơn hàng của bạn đã được xác nhận thành công. Thông tin đơn hàng: ");
                 System.out.println(order);
@@ -199,7 +200,7 @@ public class OrderService {
             accountNumber = Utils.inputString(scanner);
         }
         System.out.println("Chuyển khoản thành công.");
-        order.setOrderStatus(OrderStatus.PAID);
+        order.setOrderStatus(OrderStatus.PENDING_PAID);
         System.out.println("Trạng thái đơn hàng: " + order.getOrderStatus().getDisplayName());
     }
 
@@ -253,18 +254,44 @@ public class OrderService {
         System.out.println("Hoàn trả số tiền " + amount + " cho người mua " + buyer + ".");
     }
 
-    //    Xóa đơn hàng
-    public void deleteOrder(Scanner scanner) {
-        System.out.println("Nhập ID đơn hàng muốn xóa: ");
-        int id = Utils.inputInt(scanner);
-        Order order = findOrderById(id);
-        while (order == null) {
-            System.out.println("Không có đơn hàng nào với ID " + id + " tồn tại. Vui lòng thử lại.");
-            id = Utils.inputInt(scanner);
-            order = findOrderById(id);
+    //    Tự động xóa đơn hàng quá 7 ngày và hoản tiền cho người mua
+    public void autoCancelOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        for (Order order : Database.orders) {
+            if (order.getOrderStatus() == OrderStatus.PENDING_PAID) {
+                LocalDateTime orderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
+                long daysBetween = ChronoUnit.DAYS.between(orderDate, now);
+                if (daysBetween > 7) {
+                    if (order.getOrderStatus() != OrderStatus.CANCELED) {
+                        order.setOrderStatus(OrderStatus.CANCELED);
+                        order.setCancellationReason("Đơn hàng chưa được xử lý trong vòng 7 ngày.");
+                        System.out.println("Đơn hàng ID: " + order.getId() + " đã bị hủy do quá 7 ngày chưa được xử lý.");
+                        refundUser(order.getBuyer(), order.getTotalPrice());
+                    }
+                }
+            }
         }
-        Database.orders.remove(order);
-        System.out.println("Đơn hàng với ID " + id + " đã được xóa thành công.");
+    }
+
+    //    Xóa các đơn hàng bị hủy sau 7 ngày
+    public void deleteCanceledOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        List<Order> ordersToDelete = new ArrayList<>();
+        for (Order order : Database.orders) {
+            if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                LocalDateTime orderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
+                long daysBetween = ChronoUnit.DAYS.between(orderDate, now);
+                if (daysBetween > 7) {
+                    ordersToDelete.add(order);
+                }
+            }
+        }
+        for (Order order : ordersToDelete) {
+            Database.orders.remove(order);
+            System.out.println("Đơn hàng ID: " + order.getId() + " đã bị xóa do đã bị hủy quá 7 ngày.");
+        }
     }
 
     //    Tìm kiếm đơn hàng bằng ID
@@ -277,10 +304,10 @@ public class OrderService {
         return null;
     }
 
-    //    Hiển thị doanh thu admin
-    public void displayRevenueForAdmin() {
-        Map<String, BigDecimal> sellerRevenueMap = new HashMap<>();
-        Map<String, Map<String, Integer>> sellerProductSalesMap = new HashMap<>();
+    //    Hiển thị doanh thu từng người bán
+    public void sellerStatistics() {
+        Map<String, BigDecimal> sellerRevenue = new HashMap<>();
+        Map<String, Map<String, Integer>> sellerProductSales = new HashMap<>();
         for (Order order : Database.orders) {
             for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
                 int productId = entry.getKey();
@@ -289,19 +316,18 @@ public class OrderService {
                 if (product != null) {
                     String sellerUsername = product.getSeller();
                     BigDecimal productRevenue = product.getPrice().multiply(BigDecimal.valueOf(quantity));
-                    sellerRevenueMap.put(sellerUsername, sellerRevenueMap.getOrDefault(sellerUsername, BigDecimal.ZERO).add(productRevenue));
-                    sellerProductSalesMap.putIfAbsent(sellerUsername, new HashMap<>());
-                    sellerProductSalesMap.get(sellerUsername).put(product.getName(),
-                            sellerProductSalesMap.get(sellerUsername).getOrDefault(product.getName(), 0) + quantity);
+                    sellerRevenue.put(sellerUsername, sellerRevenue.getOrDefault(sellerUsername, BigDecimal.ZERO).add(productRevenue));
+                    sellerProductSales.putIfAbsent(sellerUsername, new HashMap<>());
+                    sellerProductSales.get(sellerUsername).put(product.getName(), sellerProductSales.get(sellerUsername).getOrDefault(product.getName(), 0) + quantity);
                 }
             }
         }
-        for (Map.Entry<String, BigDecimal> sellerEntry : sellerRevenueMap.entrySet()) {
+        for (Map.Entry<String, BigDecimal> sellerEntry : sellerRevenue.entrySet()) {
             String seller = sellerEntry.getKey();
             BigDecimal totalRevenue = sellerEntry.getValue();
             System.out.println("Doanh thu của người bán " + seller + ": " + totalRevenue);
             System.out.println("Số lượng sản phẩm đã bán: ");
-            Map<String, Integer> productSales = sellerProductSalesMap.get(seller);
+            Map<String, Integer> productSales = sellerProductSales.get(seller);
             if (productSales != null) {
                 for (Map.Entry<String, Integer> productEntry : productSales.entrySet()) {
                     System.out.println("Sản phẩm: " + productEntry.getKey() + ", Số lượng đã bán: " + productEntry.getValue());
@@ -309,6 +335,82 @@ public class OrderService {
             }
             System.out.println("------------");
         }
+    }
+
+    //    Hiển thị danh sách đơn hàng
+    public void viewAllOrders() {
+        if (Database.orders.isEmpty()) {
+            System.out.println("Hiện tại không có đơn hàng nào.");
+        } else {
+            for (Order order : Database.orders) {
+                System.out.println("Đơn hàng ID: " + order.getId() + ", Người mua: " + order.getBuyer());
+                System.out.println("Trạng thái đơn hàng: " + order.getOrderStatus());
+                System.out.println("------------------------------------------------------------------");
+            }
+        }
+    }
+
+    //    Hiển thị chi tiết đơn hàng
+    public void viewOrderDetail(Scanner scanner) {
+        System.out.println("Nhập ID đơn hàng cần xem chi tiết: ");
+        int id = Utils.inputInt(scanner);
+        Order order = findOrderById(id);
+        if (order != null) {
+            System.out.println("Chi tiết đơn hàng ID: " + order.getId());
+            System.out.println("Người mua: " + order.getBuyer());
+            System.out.println("Ngày đặt hàng: " + order.getOrderDate());
+            System.out.println("Địa chỉ giao hàng: " + order.getShippingAddress());
+            System.out.println("Tổng giá: " + order.getTotalPrice());
+            System.out.println("Trạng thái: " + order.getOrderStatus());
+            System.out.println("Sản phẩm trong đơn hàng: ");
+            for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                Product product = productService.findProductById(productId);
+                if (product != null) {
+                    System.out.println(" - Tên: " + product.getName() + ", Số lượng: " + quantity);
+                }
+            }
+            System.out.println("------------------------------------------------------------------");
+        } else {
+            System.out.println("Không có đơn hàng nào với ID " + id);
+        }
+    }
+
+    //    Hiển thị sản phẩm bán chạy
+    public void displayBestSellingProducts() {
+        Map<Integer, Integer> productSalesCount = new HashMap<>();
+        for (Order order : Database.orders) {
+            for (Map.Entry<Integer, Integer> entry : order.getProductsCart().entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                productSalesCount.put(productId, productSalesCount.getOrDefault(productId, 0) + quantity);
+            }
+        }
+        System.out.println("Sản phẩm bán chạy nhất:");
+        productSalesCount.entrySet().stream().sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())).limit(5).forEach(entry -> {
+            Product product = productService.findProductById(entry.getKey());
+            if (product != null) {
+                System.out.println("Sản phẩm: " + product.getName() + ", Số lượng đã bán: " + entry.getValue());
+            }
+        });
+    }
+
+    //    Hiển thị doanh thu tháng
+    public void displayMonthlyRevenue() {
+        Map<String, BigDecimal> monthlyRevenue = new HashMap<>();
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        for (Order order : Database.orders) {
+            LocalDateTime orderDate = LocalDateTime.parse(order.getOrderDate(), inputFormatter);
+            String monthKey = orderDate.format(outputFormatter);
+            BigDecimal orderTotal = order.getTotalPrice();
+            monthlyRevenue.put(monthKey, monthlyRevenue.getOrDefault(monthKey, BigDecimal.ZERO).add(orderTotal));
+        }
+        System.out.println("Doanh thu theo tháng:");
+        monthlyRevenue.forEach((month, revenue) -> {
+            System.out.println("Tháng " + month + ": " + revenue);
+        });
     }
 }
 

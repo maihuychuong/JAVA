@@ -2,7 +2,7 @@ package store.service;
 
 public enum OrderStatus {
     PENDING("Chờ xử lý"),
-    PAID("Đã thanh toán"),
+    PENDING_PAID("Đã thanh toán"),
     SHIPPED("Hàng đang được giao"),
     CANCELED("Đã hủy");
 

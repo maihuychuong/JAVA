@@ -455,7 +455,7 @@ public class Menu {
             System.out.println("1 - Quản lí người dùng");
             System.out.println("2 - Quản lí sản phẩm");
             System.out.println("3 - Quản lí đơn hàng");
-            System.out.println("4 - Thống kê doanh thu");
+            System.out.println("4 - Thống kê và báo cáo");
             System.out.println("5 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectAdminMenu(scanner, user);
@@ -476,8 +476,7 @@ public class Menu {
                 orderManagerMenu(scanner, user);
                 break;
             case 4:
-                System.out.println("Thực hiện thống kê doanh thu");
-                orderService.displayRevenueForAdmin();
+                statisticsAndReporting(scanner, user);
                 break;
             case 5:
                 postLogin(scanner, user);
@@ -530,6 +529,7 @@ public class Menu {
         while (true) {
             System.out.println("1 - Danh sách sản phẩm");
             System.out.println("2 - Xóa sản phẩm");
+            System.out.println("3 - Chỉnh sửa sản phẩm");
             System.out.println("3 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selectProductManagerMenu(scanner, user);
@@ -550,6 +550,8 @@ public class Menu {
                 System.out.println("Xóa sant phẩm thành công");
                 break;
             case 3:
+                System.out.println("Thực hiện chỉnh sửa sản phẩm");
+                productService.editProduct(scanner, true, user);
                 adminMenu(scanner, user);
                 break;
             default:
@@ -562,8 +564,10 @@ public class Menu {
     private void orderManagerMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("1 - Danh sách đơn hàng");
-            System.out.println("2 - Xóa đơn hàng");
-            System.out.println("3 - Quay lại");
+            System.out.println("2 - Chi tiết đơn hàng");
+            System.out.println("3 - Xóa đơn hàng quá hạn xử lý");
+            System.out.println("4 - Xóa đơn hàng đã bị hủy sau 7 ngày");
+            System.out.println("5 - Quay lại");
             System.out.println("Mời lựa chọn: ");
             selecOrderManagerMenu(scanner, user);
         }
@@ -575,19 +579,64 @@ public class Menu {
         switch (choice) {
             case 1:
                 System.out.println("Thực hiển hiển thị danh sách đơn hàng");
-                System.out.println(Database.orders);
+                orderService.viewAllOrders();
                 break;
             case 2:
-                System.out.println("Thực hiển xóa đơn hàng");
-                orderService.deleteOrder(scanner);
-                System.out.println("Xóa đơn hàng thành công");
+                System.out.println("Thực hiển hiển thị chi tiết đơn hàng");
+                orderService.viewOrderDetail(scanner);
                 break;
             case 3:
+                System.out.println("Thực hiển xóa đơn hàng quá hạn xử lý");
+                orderService.autoCancelOrders();
+                System.out.println("Xóa đơn hàng thành công");
+                break;
+            case 4:
+                System.out.println("Thực hiển xóa đơn hàng quá hạn xử lý");
+                orderService.deleteCanceledOrders();
+                break;
+            case 5:
                 adminMenu(scanner, user);
                 break;
             default:
                 System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
                 orderManagerMenu(scanner, user);
+        }
+    }
+
+    //    Menu thống kê và báo cáo
+    private void statisticsAndReporting(Scanner scanner, User user) {
+        while (true) {
+            System.out.println("1 - Thống kê từng người bán");
+            System.out.println("2 - Sản phẩm bán chạy nhất");
+            System.out.println("3 - Doanh thu theo tháng");
+            System.out.println("4 - Quay lại");
+            System.out.println("Mời lựa chọn: ");
+            selectStatisticsAndReporting(scanner, user);
+        }
+    }
+
+    //    Lựa chọn Menu thống kê và báo cáo
+    private void selectStatisticsAndReporting(Scanner scanner, User user) {
+        int choice = Utils.inputInt(scanner);
+        switch (choice) {
+            case 1:
+                System.out.println("Thực hiện hiển thị doanh thu từng người bán");
+                orderService.sellerStatistics();
+                break;
+            case 2:
+                System.out.println("Thực hiện hiển thị sản phẩm bán chạy nhất");
+                orderService.displayBestSellingProducts();
+                break;
+            case 3:
+                System.out.println("Thực hiện hiển thị doanh thu theo tháng");
+                orderService.displayMonthlyRevenue();
+                break;
+            case 4:
+                adminMenu(scanner, user);
+                break;
+            default:
+                System.out.println("Lựa chọn của bạn không hợp lệ vui lòng chọn lại.");
+                adminMenu(scanner, user);
         }
     }
 }

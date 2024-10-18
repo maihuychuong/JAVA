@@ -40,6 +40,10 @@ public class ProductService {
             id = Utils.inputInt(scanner);
             product = findProductById(id);
         }
+        if (!product.getSeller().equals(user.getUsername()) && !user.getRole().equalsIgnoreCase("Admin")){
+            System.out.println("Bạn không có quyền chỉnh sửa hoặc xóa sản phẩm này.");
+            return;
+        }
         if (update) {
             System.out.println("Nhập thông tin mới của sản phẩm: ");
             Product updateProduct = inputInfo(scanner, user);
@@ -49,7 +53,18 @@ public class ProductService {
             product.setQuantity(updateProduct.getQuantity());
             product.setSeller(updateProduct.getSeller());
         } else {
-            Database.products.remove(product);
+            System.out.println("Bạn có chắc chắn muốn xóa sản phẩm này? (Y/N): ");
+            String confirm = Utils.inputString(scanner);
+            while (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("N")) {
+                System.out.println("Lựa chọn không hợp lệ. Vui lòng nhập lại.");
+                confirm = Utils.inputString(scanner);
+            }
+            if (confirm.equalsIgnoreCase("Y")) {
+                Database.products.remove(product);
+                System.out.println("Sản phẩm đã bị xóa thành công.");
+            } else {
+                System.out.println("Hủy xóa sản phẩm.");
+            }
         }
     }
 
