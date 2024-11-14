@@ -2,12 +2,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Main {
+
+public class Main{
     public static void main(String[] args) {
         List<Student> students = new ArrayList<>();
-        students.add(new Student("Nguyen Van A", 20, 3));
         students.add(new Student("Nguyen Thi B", 22, 3));
-        students.add(new Student("Nguyen Thi B", 23, 4));
+        students.add(new Student("Nguyen Thi A", 20, 3));
+        students.add(new Student("Hoang Thi C", 23, 4));
         students.add(new Student("Nguyen Thi A", 23, 4));
         students.add(new Student("Hoang Thi D", 22, 2));
 
@@ -23,7 +24,7 @@ public class Main {
         System.out.println("\nSắp xếp theo tuổi và GPA:");
         students.forEach(System.out::println);
 
-        // #3: Sắp xếp theo tên (Ví dụ là Hoàng Văn A, thì chỉ xét A thôi)
+        // #3: Sắp xếp theo tên (chỉ xét tên cuối cùng trong họ và tên)
         students.sort(Comparator.comparing(student -> student.getFullName().split(" ")[student.getFullName().split(" ").length - 1]));
         System.out.println("\nSắp xếp theo tên (xét tên cuối cùng):");
         students.forEach(System.out::println);
